@@ -1,7 +1,7 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
-app = FastAPI()
+router = APIRouter(tags=['users'], responses={404: {"messages": "Usuario no encotrado"}})
 
 # Entidad User
 class User(BaseModel):
@@ -15,24 +15,23 @@ users_list = [User(id=1,name='Joel', surname='German', username='JoelG', age=20)
                 User(id=2,name='Gabriel', surname='Valdez', username='GabrielV', age=20), 
                 User(id=3,name='Juan', surname='Martinez', username='JuanM', age=19)]
 #get all
-@app.get('/users',status_code=200)
+@router.get('/users',status_code=200)
 async def users():
     return users_list
 
 #Parameters
-@app.get('/users/{id}/') 
+@router.get('/users/{id}/') 
 async def user(id: int):
    return search_users(id)
 
 #Query
-@app.get('/user/')
+@router.get('/user/')
 async def user(id: int):
     return search_users(id)
 
 
 # Post
-
-@app.post('/user/',response_model=User,status_code=201)
+@router.post('/user/',response_model=User,status_code=201)
 async def new_user(user: User):
     if type(search_users(user.id)) == User:
         raise HTTPException(status_code=204, detail='El usuario ya existe')
@@ -41,20 +40,19 @@ async def new_user(user: User):
     return user    
 
 
-@app.put('/user/')
+@router.put('/user/')
 async def user(user:User):
     found = False
     for index, saved_user in enumerate(users_list):
         if saved_user.id == user.id:
             users_list[index] = user
-            found = True
-    return user        
+            found = True  
     if not found:
-         return {"error": 'Usuario no encontrado'}
+         raise HTTPException(status_code=404, detail='Usuario no existe')
 
 #Delete
 
-@app.delete('/user/{id}')
+@router.delete('/user/{id}')
 async def user_delete(id: int):
     found = False
     for index, saved_user in enumerate(users_list):
@@ -63,7 +61,7 @@ async def user_delete(id: int):
             found = True
             break
     if not found:
-        return {"error": 'No se ha eliminado el usuario'}
+         raise HTTPException(status_code=404, detail='Usuario no existe')
 
 def search_users(id: int):
     users = filter(lambda user: user.id == id, users_list)
