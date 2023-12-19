@@ -29,7 +29,6 @@ async def user(id: int):
 async def user(id: int):
     return search_users(id)
 
-
 # Post
 @router.post('/user/',response_model=User,status_code=201)
 async def new_user(user: User):
@@ -38,7 +37,6 @@ async def new_user(user: User):
     else:
         users_list.append(user)
     return user    
-
 
 @router.put('/user/')
 async def user(user:User):
@@ -51,7 +49,6 @@ async def user(user:User):
          raise HTTPException(status_code=404, detail='Usuario no existe')
 
 #Delete
-
 @router.delete('/user/{id}')
 async def user_delete(id: int):
     found = False
